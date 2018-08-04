@@ -1,4 +1,6 @@
+#obj-m represents loadable modules.
 obj-m := lkh.o
+
 lkh-objs += module.o
 lkh-objs += sys_hook.o
 lkh-objs += hooks.o
