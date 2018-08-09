@@ -5,8 +5,8 @@
 #include <linux/slab.h>
 #include "sys_hook.h"
 
-static uint64_t
-get_cr0(void)
+
+static uint64_t get_cr0(void)
 {
     uint64_t ret;
 
@@ -18,8 +18,8 @@ get_cr0(void)
     return ret;
 }
 
-static void
-set_cr0(uint64_t cr0)
+
+static void set_cr0(uint64_t cr0)
 {
     __asm__ volatile (
         "movq %[cr0], %%cr0"
@@ -28,8 +28,7 @@ set_cr0(uint64_t cr0)
     );
 }
 
-struct sys_hook *
-sys_hook_init(uintptr_t k32, uintptr_t k64)
+struct sys_hook* sys_hook_init(uintptr_t k32, uintptr_t k64)
 {
     struct sys_hook *sh;
 
@@ -47,8 +46,7 @@ sys_hook_init(uintptr_t k32, uintptr_t k64)
     return sh;
 }
 
-bool_t
-sys_hook_add64(struct sys_hook *hook, unsigned int syscall_id, void *func)
+bool_t sys_hook_add64(struct sys_hook *hook, unsigned int syscall_id, void *func)
 {
     struct sys_hook_ent *ent;
 
@@ -81,14 +79,14 @@ sys_hook_add64(struct sys_hook *hook, unsigned int syscall_id, void *func)
     return TRUE;
 }
 
-bool_t
-sys_hook_del64(struct sys_hook *hook, unsigned int syscall_id)
+
+bool_t sys_hook_del64(struct sys_hook *hook, unsigned int syscall_id)
 {
     return TRUE;
 }
 
-uintptr_t
-sys_hook_get_orig64(struct sys_hook *hook, unsigned int syscall_id)
+
+uintptr_t sys_hook_get_orig64(struct sys_hook *hook, unsigned int syscall_id)
 {
     struct sys_hook_ent *curr;
 
@@ -97,12 +95,11 @@ sys_hook_get_orig64(struct sys_hook *hook, unsigned int syscall_id)
             return curr->original;
     }
 
-    
     return 0;
 }
 
-void
-sys_hook_free(struct sys_hook *hook)
+
+void sys_hook_free(struct sys_hook *hook)
 {
     struct sys_hook_ent *curr, *tmp;
 

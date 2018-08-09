@@ -10,10 +10,16 @@
 #define SUCCESS_CODE 0
 #define ERROR_CODE 1
 
+/* Module parameter macros */
+static char *kbase32 = NULL, *kbase64 = NULL;
+module_param(kbase32, charp, 0);
+MODULE_PARM_DESC(kbase32, "Base address of the x86 syscall table, in hex");
+module_param(kbase64, charp, 0);
+MODULE_PARM_DESC(kbase64, "Base address of the x64 syscall table, in hex");
+
 struct sys_hook *lkh_sys_hook;
 
-static uintptr_t
-hex_addr_to_pointer(const char *str)
+static uintptr_t hex_addr_to_pointer(const char *str)
 {
     uintptr_t sum;
 
@@ -32,13 +38,6 @@ hex_addr_to_pointer(const char *str)
 
     return sum;
 }
-
-/* Module parameter macros */
-static char *kbase32 = NULL, *kbase64 = NULL;
-module_param(kbase32, charp, 0);
-MODULE_PARM_DESC(kbase32, "Base address of the x86 syscall table, in hex");
-module_param(kbase64, charp, 0);
-MODULE_PARM_DESC(kbase64, "Base address of the x64 syscall table, in hex");
 
 static int __init module_entry(void)
 {
@@ -82,8 +81,7 @@ static int __init module_entry(void)
     return 0;
 }
 
-static void __exit
-module_cleanup(void)
+static void __exit module_cleanup(void)
 {
     sys_hook_free(lkh_sys_hook);
     log_info("lkh has finished\n");

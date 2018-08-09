@@ -4,8 +4,7 @@
 
 extern struct sys_hook *lkh_sys_hook;
 
-asmlinkage int
-mkdir_hook(const char *path, int mode)
+asmlinkage int mkdir_hook(const char *path, int mode)
 {
     sys_mkdir_t sys_mkdir;
     
