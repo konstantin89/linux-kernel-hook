@@ -1,0 +1,31 @@
+ asmlinkage is a #define for some gcc magic that 
+ tells the compiler that the  function should not  
+ expect to find any of its arguments in registers  
+ (a common optimization), but only on the CPU's stack.
+
+Look at the definition of /usr/include/asm/linkage.h:
+    #define asmlinkage CPP_ASMLINKAGE __attribute__((regparm(0)))
+
+__Attribute__ is the key, is the GCC extension to the C language, 
+REGPARM (0) did not pass parameters from the register
+
+If it is __attribute__ ((REGPARM (3))), so when you call the function 
+parameters are not passed on the stack, but directly into the register, 
+the function to be called directly from the register parameters
+
+80x86 assembly has two ways of delivering function arguments:
+    1. register method
+    2. stack method
+
+Register method's  advantage is that its simple and rapid.
+Another parameter transfer practice is to use  the stack:
+    push number1
+    push number2
+    push number3
+    call sum
+
+Then sum will extract the arguments from the stack:
+    pop ax
+    pop ax
+    pop bx
+    pop cx
