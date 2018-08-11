@@ -28,8 +28,10 @@ static void set_cr0(uint64_t cr0)
     );
 }
 
+
 struct sys_hook* sys_hook_init(uintptr_t k32, uintptr_t k64)
 {
+    
     struct sys_hook *sh;
 
     sh = kmalloc(sizeof (struct sys_hook), GFP_KERNEL);
@@ -41,7 +43,7 @@ struct sys_hook* sys_hook_init(uintptr_t k32, uintptr_t k64)
     sh->x86_sct = (unsigned int *)k32;
     sh->x64_sct = (unsigned long long *)k64;
 
-    sh->head = sh->tail = NULL;
+    INIT_LIST_HEAD(&sh->hook_list_head.list);
 
     return sh;
 }
@@ -57,7 +59,6 @@ bool_t sys_hook_add64(struct sys_hook *hook, unsigned int syscall_id, void *func
     }
 
     /* Create our new hook entry */
-    ent->next = NULL;
     ent->syscall_id = syscall_id;
     ent->original = hook->x64_sct[syscall_id];
     ent->hooked = (uintptr_t)func;
@@ -68,13 +69,9 @@ bool_t sys_hook_add64(struct sys_hook *hook, unsigned int syscall_id, void *func
     hook->x64_sct[syscall_id] = (unsigned long long)ent->hooked;
     set_cr0(get_cr0() | CR0_WRITE_PROTECT);
 
-    /* Update the hook list */
-    if (hook->head == NULL)
-        hook->head = hook->tail = ent;
-    else {
-        hook->tail->next = ent;
-        hook->tail = ent;
-    }
+    INIT_LIST_HEAD(&ent->list);
+
+    list_add_tail(&ent->list, &hook->hook_list_head.list);
 
     return TRUE;
 }
@@ -88,28 +85,40 @@ bool_t sys_hook_del64(struct sys_hook *hook, unsigned int syscall_id)
 
 uintptr_t sys_hook_get_orig64(struct sys_hook *hook, unsigned int syscall_id)
 {
+    struct list_head *node;
     struct sys_hook_ent *curr;
 
-    for (curr = hook->head; curr != NULL; curr = curr->next) {
-        if (curr->type == SHT_X64 && curr->syscall_id == syscall_id)
-            return curr->original;
-    }
+    list_for_each(node, &hook->hook_list_head.list)
+    {
 
+        curr = list_entry(node, struct sys_hook_ent, list);
+
+        if (curr->type == SHT_X64 && curr->syscall_id == syscall_id)
+        {
+            return curr->original;
+        }
+            
+    }
     return 0;
 }
 
 
 void sys_hook_free(struct sys_hook *hook)
 {
-    struct sys_hook_ent *curr, *tmp;
+    struct list_head *node;
+    struct sys_hook_ent *curr;
 
     if (hook == NULL)
         return;
 
     set_cr0(get_cr0() & ~CR0_WRITE_PROTECT);
 
-    for (curr = hook->head; curr != NULL;) {
-        switch (curr->type) {
+    list_for_each(node, &hook->hook_list_head.list)
+    {
+
+        curr = list_entry(node, struct sys_hook_ent, list);
+
+         switch (curr->type) {
             case SHT_X64:
                 hook->x64_sct[curr->syscall_id] = (unsigned long long)curr->original;
                 break;
@@ -121,11 +130,9 @@ void sys_hook_free(struct sys_hook *hook)
                 break;
         }
 
-        tmp = curr->next;
-        kfree(curr);
-        curr = tmp;
+        list_del(&curr->list);
     }
 
     set_cr0(get_cr0() | CR0_WRITE_PROTECT);
-    kfree(hook);
+
 }

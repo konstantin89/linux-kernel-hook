@@ -1,12 +1,7 @@
 #pragma once
 
+#include <linux/list.h>
 #include "types.h"
-
-struct sys_hook {
-    unsigned int *x86_sct;
-    unsigned long long *x64_sct;
-    struct sys_hook_ent *head, *tail;
-};
 
 enum sys_hook_type {
     SHT_X86,
@@ -14,11 +9,21 @@ enum sys_hook_type {
 };
 
 struct sys_hook_ent {
-    struct sys_hook_ent *next;
     unsigned int syscall_id;
-    uintptr_t original, hooked;
+    uintptr_t original;
+    uintptr_t hooked;
     enum sys_hook_type type;
+
+    struct list_head list; 
 };
+
+struct sys_hook {
+    unsigned int *x86_sct;
+    unsigned long long *x64_sct;
+    struct sys_hook_ent hook_list_head;
+};
+
+
 
 #define CR0_WRITE_PROTECT   (1 << 16)
 
