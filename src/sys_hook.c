@@ -106,6 +106,7 @@ uintptr_t sys_hook_get_orig64(struct sys_hook *hook, unsigned int syscall_id)
 void sys_hook_free(struct sys_hook *hook)
 {
     struct list_head *node;
+    struct list_head *temp;
     struct sys_hook_ent *curr;
 
     if (hook == NULL)
@@ -113,7 +114,7 @@ void sys_hook_free(struct sys_hook *hook)
 
     set_cr0(get_cr0() & ~CR0_WRITE_PROTECT);
 
-    list_for_each(node, &hook->hook_list_head.list)
+    list_for_each_safe(node, temp, &hook->hook_list_head.list)
     {
 
         curr = list_entry(node, struct sys_hook_ent, list);
