@@ -2,6 +2,7 @@
 
 #include <linux/list.h>
 #include "types.h"
+#include "utils.h"
 
 enum sys_hook_type {
     SHT_X86,

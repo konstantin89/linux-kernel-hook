@@ -4,6 +4,7 @@
 #include <linux/string.h>
 #include <linux/slab.h>
 #include "sys_hook.h"
+#include "logger.h"
 
 
 static uint64_t get_cr0(void)
@@ -36,7 +37,7 @@ struct sys_hook* sys_hook_init(uintptr_t k32, uintptr_t k64)
 
     sh = kmalloc(sizeof (struct sys_hook), GFP_KERNEL);
     if (IS_ERR(sh)) {
-        printk(KERN_INFO "not enough memory for hooks\n");
+        log_error("Not enough memory for hooks\n");
         return NULL;
     }
 
@@ -54,7 +55,7 @@ bool_t sys_hook_add64(struct sys_hook *hook, unsigned int syscall_id, void *func
 
     ent = kmalloc(sizeof (struct sys_hook_ent), GFP_KERNEL);
     if (IS_ERR(ent)) {
-        printk(KERN_INFO "not enough memory for sys hook\n");
+        log_error("Not enough memory for sys hook\n");
         return FALSE;
     }
 
@@ -127,7 +128,7 @@ void sys_hook_free(struct sys_hook *hook)
                 hook->x86_sct[curr->syscall_id] = (unsigned int)curr->original;
                 break;
             default:
-                printk(KERN_EMERG "possible memory corruption in syscall hooks - invalid hook state\n");
+                log_error("Possible memory corruption in syscall hooks - invalid hook state\n");
                 break;
         }
 

@@ -6,6 +6,8 @@ KVERSION = $(shell uname -r)
 lkh-objs += src/module.o
 lkh-objs += src/sys_hook.o
 lkh-objs += src/hooks.o
+lkh-objs += src/utils.o
+
 
 ccflags-y := -I$(src)
 

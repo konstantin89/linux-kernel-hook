@@ -6,8 +6,8 @@
 #include <linux/string.h>
 
 
-#define log_info(format, ...) do{ printk(KERN_INFO format, ##__VA_ARGS__); }while(0);
+#define log_info(format, args...)  printk(KERN_INFO "[ ] lkh " format, ##args);
 
-#define log_error(format, ...) do{ printk(KERN_ERR format, ##__VA_ARGS__); }while(0);
+#define log_error(format, args...)  printk(KERN_ERR "[X] lkh " format, ##args);
 
 #endif
