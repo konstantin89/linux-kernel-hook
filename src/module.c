@@ -25,7 +25,7 @@ static int __init module_entry(void)
 {
     uintptr_t k32, k64;
 
-    log_info("lkh initializing.");
+    log_info("Loading");
     
     if (kbase32 == NULL || kbase32[0] == '\0') 
     {
@@ -56,6 +56,8 @@ static int __init module_entry(void)
     }
 
     sys_hook_add64(lkh_sys_hook, __NR_mkdir, (void *)mkdir_hook);
+    sys_hook_add64(lkh_sys_hook, __NR_open, (void *)open_hook);
+
 
     log_info("Module loaded");
     return 0;
@@ -64,6 +66,7 @@ static int __init module_entry(void)
 static void __exit module_cleanup(void)
 {
     sys_hook_free(lkh_sys_hook);
+
     log_info("Module unloaded");
 }
 
